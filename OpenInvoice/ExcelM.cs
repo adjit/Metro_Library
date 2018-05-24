@@ -17,6 +17,21 @@ namespace Metro
         public static void Export(DataTable dt)
         {
             Excel.Application exApp = new Excel.Application();
+            Excel._Workbook wb = null;
+
+            wb = (Excel._Workbook)(exApp.Workbooks.Add(Excel.XlWBATemplate.xlWBATWorksheet));
+
+            Excel.Worksheet sheet = wb.ActiveSheet;
+
+            for(int r = 0; r < dt.Rows.Count; r++)
+            {
+                for(int c = 0; c < dt.Columns.Count; c++)
+                {
+                    sheet.Cells[r + 1, c + 1].Value2 = dt.Rows[r][c];
+                }
+            }
+
+            exApp.Visible = true;
         }
     }
 }
