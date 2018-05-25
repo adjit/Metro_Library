@@ -12,7 +12,7 @@ namespace Metro
      *      for any calls relating to gathering information from the 
      *      Metropolitan Sales database
      */
-    class Database
+    public class Database
     {
         private static SqlConnection dbConnection;
         private static SqlCommand cmd;
