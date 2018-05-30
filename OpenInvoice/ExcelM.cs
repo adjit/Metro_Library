@@ -15,15 +15,33 @@ namespace Metro
     public class ExcelM
     {
 
+        private static Excel.Application exApp;
+        private static Excel.Workbooks wbs;
+        private static Excel._Workbook wb;
+        private static Excel.Worksheet sheet;
+
+        private static void _initializeExcel()
+        {
+            exApp = new Excel.Application();
+            wbs = exApp.Workbooks;
+            wb = (Excel._Workbook)(wbs.Add(Excel.XlWBATemplate.xlWBATWorksheet));
+            sheet = wb.ActiveSheet;
+        }
+
+        private static void _cleanObjects()
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+            Marshal.FinalReleaseComObject(sheet);
+            Marshal.FinalReleaseComObject(wb);
+            Marshal.FinalReleaseComObject(wbs);
+            Marshal.FinalReleaseComObject(exApp);
+        }
+
         public static void Export(DataTable dt)
         {
-            Excel.Application exApp = new Excel.Application();
-            Excel.Workbooks wbs = exApp.Workbooks;
-            Excel._Workbook wb = null;
-
-            wb = (Excel._Workbook)(wbs.Add(Excel.XlWBATemplate.xlWBATWorksheet));
-
-            Excel.Worksheet sheet = wb.ActiveSheet;
+            _initializeExcel();
 
             for(int r = 0; r <= dt.Rows.Count; r++)
             {
@@ -32,20 +50,19 @@ namespace Metro
                     if (r == 0) sheet.Cells[r + 1, c + 1].Value2 = "'" + dt.Columns[c].ColumnName;
                     else
                     {
-                        sheet.Cells[r + 1, c + 1].Value2 = "'" + dt.Rows[r - 1][c];
+                        string colName = dt.Columns[c].ColumnName.ToUpper();
+
+                        if(colName.Contains("PRICE") || colName.Contains("COST") || colName.Contains("QTY"))
+                            sheet.Cells[r + 1, c + 1].Value2 = dt.Rows[r - 1][c];
+                        else
+                            sheet.Cells[r + 1, c + 1].Value2 = "'" + dt.Rows[r - 1][c];
                     }
                 }
             }
 
             exApp.Visible = true;
 
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-
-            Marshal.FinalReleaseComObject(sheet);
-            Marshal.FinalReleaseComObject(wb);
-            Marshal.FinalReleaseComObject(wbs);
-            Marshal.FinalReleaseComObject(exApp);
+            _cleanObjects();
         }
     }
 }
