@@ -52,8 +52,15 @@ namespace Metro
                     {
                         string colName = dt.Columns[c].ColumnName.ToUpper();
 
-                        if(colName.Contains("PRICE") || colName.Contains("COST") || colName.Contains("QTY"))
+                        if(colName.Contains("PRICE") || colName.Contains("COST"))
+                        {
                             sheet.Cells[r + 1, c + 1].Value2 = dt.Rows[r - 1][c];
+                            sheet.Cells[r + 1, c + 1].NumberFormat = "$#,##0.00";
+                        }
+                        else if(colName.Contains("QTY"))
+                        {
+                            sheet.Cells[r + 1, c + 1].Value2 = dt.Rows[r - 1][c];
+                        }
                         else
                             sheet.Cells[r + 1, c + 1].Value2 = "'" + dt.Rows[r - 1][c];
                     }
