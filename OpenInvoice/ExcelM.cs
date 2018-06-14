@@ -41,23 +41,62 @@ namespace Metro
 
         public static void Export(DataTable dt)
         {
+            _Export(dt);
+
+            exApp.Visible = true;
+
+            _cleanObjects();
+        }
+
+        public static void Export(DataTable dt, Boolean showExcel)
+        {
+            _Export(dt);
+
+            if (showExcel)
+                exApp.Visible = true;
+
+            _cleanObjects();
+        }
+
+        public static void Export(DataTable dt, Boolean showExcel, string saveAs)
+        {
+            _Export(dt);
+
+            /*wb.SaveAs(saveAs, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing,
+                        Excel.XlSaveAsAccessMode.xlNoChange, Type.Missing, Type.Missing, Type.Missing,
+                            Type.Missing, Type.Missing);
+                            */
+            if (showExcel)
+                exApp.Visible = true;
+            else
+            {
+                exApp.DisplayAlerts = false;
+                wb.Close(SaveChanges:true, Filename:saveAs);
+                wbs.Close();
+                exApp.Quit();
+            }
+            _cleanObjects();
+        }
+
+        private static void _Export(DataTable dt)
+        {
             _initializeExcel();
 
-            for(int r = 0; r <= dt.Rows.Count; r++)
+            for (int r = 0; r <= dt.Rows.Count; r++)
             {
-                for(int c = 0; c < dt.Columns.Count; c++)
+                for (int c = 0; c < dt.Columns.Count; c++)
                 {
                     if (r == 0) sheet.Cells[r + 1, c + 1].Value2 = "'" + dt.Columns[c].ColumnName;
                     else
                     {
                         string colName = dt.Columns[c].ColumnName.ToUpper();
 
-                        if(colName.Contains("PRICE") || colName.Contains("COST"))
+                        if (colName.Contains("PRICE") || colName.Contains("COST"))
                         {
                             sheet.Cells[r + 1, c + 1].Value2 = dt.Rows[r - 1][c];
                             sheet.Cells[r + 1, c + 1].NumberFormat = "$#,##0.00";
                         }
-                        else if(colName.Contains("QTY"))
+                        else if (colName.Contains("QTY"))
                         {
                             sheet.Cells[r + 1, c + 1].Value2 = dt.Rows[r - 1][c];
                         }
@@ -66,10 +105,6 @@ namespace Metro
                     }
                 }
             }
-
-            exApp.Visible = true;
-
-            _cleanObjects();
         }
     }
 }
