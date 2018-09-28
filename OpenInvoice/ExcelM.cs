@@ -78,6 +78,13 @@ namespace Metro
             _cleanObjects();
         }
 
+        public static void Export(DataTable dt, bool includeAging, IProgress<double> progress)
+        {
+            _Export(dt, includeAging, progress);
+            exApp.Visible = true;
+            _cleanObjects();
+        }
+
         private static void _Export(DataTable dt)
         {
             _initializeExcel();
@@ -104,6 +111,57 @@ namespace Metro
                             sheet.Cells[r + 1, c + 1].Value2 = "'" + dt.Rows[r - 1][c];
                     }
                 }
+            }
+        }
+
+        private static void _Export(DataTable dt, bool includeAging, IProgress<double> progress)
+        {
+            _initializeExcel();
+
+            double step = 90.00 / Convert.ToDouble(dt.Rows.Count);
+
+            for (int r = 0; r <= dt.Rows.Count; r++)
+            {
+                for (int c = 0; c < dt.Columns.Count; c++)
+                {
+                    if (r == 0) sheet.Cells[r + 1, c + 1].Value2 = "'" + dt.Columns[c].ColumnName;
+                    else
+                    {
+                        string colName = dt.Columns[c].ColumnName.ToUpper();
+
+                        if (colName.Contains("PRICE") || colName.Contains("COST")
+                            || colName.Contains("AMOUNT"))
+                        {
+                            sheet.Cells[r + 1, c + 1].Value2 = dt.Rows[r - 1][c];
+                            sheet.Cells[r + 1, c + 1].NumberFormat = "$#,##0.00";
+                        }
+                        else if (colName.Contains("DATE"))
+                        {
+                            sheet.Cells[r + 1, c + 1].Value2 = dt.Rows[r - 1][c];
+                            sheet.Cells[r + 1, c + 1].NumberFormat = "MM/DD/YYYY";
+                        }
+                        else if (colName.Contains("QTY"))
+                        {
+                            sheet.Cells[r + 1, c + 1].Value2 = dt.Rows[r - 1][c];
+                        }
+                        else
+                            sheet.Cells[r + 1, c + 1].Value2 = "'" + dt.Rows[r - 1][c];
+                    }
+
+                    //Add last column for aging
+                    if(c+1 == dt.Columns.Count)
+                    {
+                        if (r == 0) sheet.Cells[r + 1, c + 2].Value2 = "Aging";
+                        else
+                        {
+                            DateTime invoiceDate = Convert.ToDateTime(dt.Rows[r - 1][3]);
+                            DateTime today = DateTime.Today;
+                            sheet.Cells[r + 1, c + 2].Value2 = (today - invoiceDate).Days;
+                        }
+                    }
+                }
+
+                progress.Report(step);
             }
         }
     }
