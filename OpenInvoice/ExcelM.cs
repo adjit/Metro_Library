@@ -98,10 +98,16 @@ namespace Metro
                     {
                         string colName = dt.Columns[c].ColumnName.ToUpper();
 
-                        if (colName.Contains("PRICE") || colName.Contains("COST"))
+                        if (colName.Contains("PRICE") || colName.Contains("COST")
+                            || colName.Contains("AMOUNT"))
                         {
                             sheet.Cells[r + 1, c + 1].Value2 = dt.Rows[r - 1][c];
                             sheet.Cells[r + 1, c + 1].NumberFormat = "$#,##0.00";
+                        }
+                        else if (colName.Contains("DATE"))
+                        {
+                            sheet.Cells[r + 1, c + 1].Value2 = dt.Rows[r - 1][c];
+                            sheet.Cells[r + 1, c + 1].NumberFormat = "MM/DD/YYYY";
                         }
                         else if (colName.Contains("QTY"))
                         {
